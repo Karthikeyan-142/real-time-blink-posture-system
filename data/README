@@ -1,0 +1,44 @@
+✨ OBJECTIVES OF THE PROJECT ✨
+
+The objective of the BlinkWise system is to continuously observe the blinking pattern and posture behavior of users when they sit in front of a computer screen. The system focuses on identifying blink frequency using Eye Aspect Ratio (EAR), classifying posture as good or bad using pose-based geometric analysis, and providing alerts to reduce health risks. It also aims to assign individual identity tracking for each user in the camera view and maintain separate statistics like blink count, alert status, and session time. The main purpose is to improve user awareness, reduce eye strain, and encourage healthy sitting posture during long working or study hours.
+
+
+🔥 MODEL TYPE 🔥
+
+This project is a REAL-TIME COMPUTER-VISION BASED HUMAN-MONITORING MODEL.
+It consists of the following model types:
+
+🔸 EAR-based blink detection model
+🔸 Geometric posture classification model
+🔸 Multi-person identity tracking model
+🔸 Flask-based web analytics model
+
+Blink detection follows threshold logic applied over eye-landmark distances, whereas posture estimation uses shoulder–nose angle deviation. Identity tracking is done using nearest landmark matching approach.
+
+
+💡 SCOPE OF THE PROJECT 💡
+
+The scope includes implementation in workplaces, online learning environments, libraries, classrooms, computer labs, and home study setups. The system can be extended to store user logs, generate health reports, send mobile notifications, and maintain long-term behavioral graphs. It is useful for students, software employees, designers, video editors, gamers, and remote workers who spend long hours on screen.
+
+
+❗ PROBLEM STATEMENT ❗
+
+Hardly anyone is aware of reduced blinking while using screens, which causes eye dryness and stress. Similarly, most users don’t correct their posture until they feel pain. Existing systems do not continuously monitor eye behavior and posture in real time. Hence, a system is required that automatically observes these activities, reports changes instantly, and promotes self-correction without user intervention.
+
+
+💡 PROPOSED SOLUTION 💡
+
+The BlinkWise system analyzes a live video stream, extracts facial and posture information, calculates blink count, measures posture accuracy, and provides instant alert messages. Each person appearing in front of the camera is treated as a separate entity and their information is displayed individually. A web-based dashboard shows camera visuals, blink alerts, posture warnings, and session statistics in real time. This motivates users to maintain correct posture and blink regularly.
+
+
+
+🏆 ADVANTAGES OF THE SYSTEM 🏆
+
+✔ Multi-person tracking
+✔ No training dataset required
+✔ Web visualization
+✔ Real-time live alerts
+✔ Simple interface
+✔ Uses normal camera
+✔ Motivates good posture
+✔ Improves blinking frequency

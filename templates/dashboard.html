@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Blink Wise – Multi-Person Monitor</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 1100px;
+      margin: 20px auto;
+      padding: 0 10px;
+      background: #111;          /* full page dark */
+      color: #f5f5f5;            /* light text */
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+      color: #ffffff;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .controls button {
+      padding: 6px 14px;
+      margin: 0 5px;
+      border-radius: 6px;
+      border: 1px solid #007BFF;
+      cursor: pointer;
+    }
+    .controls button:nth-child(1) {
+      background: #007BFF;
+      color: white;
+    }
+    .controls button:nth-child(2) {
+      background: #333;
+      color: #f5f5f5;
+    }
+    .video-container {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      background: #000;                 /* black bg for camera */
+      padding: 10px;
+      border-radius: 12px;
+      border: 3px solid #00FFFF;        /* cyan border */
+    }
+    .video-container img {
+      border-radius: 10px;
+      border: 2px solid #444;           /* inner border */
+      max-width: 100%;
+      background: #000;                 /* if no image, still black */
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      background: #181818;
+    }
+    th, td {
+      border: 1px solid #444;
+      text-align: center;
+      padding: 8px;
+    }
+    th {
+      background: #222;
+      color: #f5f5f5;
+    }
+    td {
+      color: #e0e0e0;
+    }
+    .alert-yes {
+      color: #ff4d4d;
+      font-weight: bold;
+    }
+    .alert-no {
+      color: #4dff4d;
+      font-weight: bold;
+    }
+    .sub-title {
+      margin-top: 20px;
+      margin-bottom: 5px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+  <h1>Blink Wise – Multi-Person Blink & Posture Dashboard</h1>
+
+  <div class="controls">
+    <button onclick="startCam()">Camera ON</button>
+    <button onclick="stopCam()">Camera OFF</button>
+  </div>
+
+  <div class="video-container">
+    <img id="cam_feed" src="" alt="Camera Off">
+  </div>
+
+  <div class="sub-title">Per-Person Blink + Posture Details</div>
+  <table id="people_table">
+    <thead>
+      <tr>
+        <th>Person ID</th>
+        <th>Total Blink Count</th>
+        <th>EAR</th>
+        <th>Blink Alert</th>
+        <th>Posture Status</th>
+        <th>Posture Good %</th>
+        <th>Posture Alert</th>
+        <th>Session Time (min)</th>
+        <th>Last Seen (sec ago)</th>
+      </tr>
+    </thead>
+    <tbody>
+      <!-- rows added by JS -->
+    </tbody>
+  </table>
+
+  <div class="sub-title">Global Posture Summary</div>
+  <table>
+    <tr>
+      <th>Posture Status</th>
+      <td id="posture_status">No Person</td>
+    </tr>
+    <tr>
+      <th>Posture Good %</th>
+      <td id="good_posture_pct">0.0</td>
+    </tr>
+    <tr>
+      <th>Posture Alert</th>
+      <td id="posture_alert" class="alert-no">No</td>
+    </tr>
+    <tr>
+      <th>Session Time (minutes)</th>
+      <td id="elapsed_min">0.0</td>
+    </tr>
+  </table>
+
+  <script>
+    function startCam() {
+      document.getElementById('cam_feed').src = "/video_feed";
+    }
+
+    async function stopCam() {
+      document.getElementById('cam_feed').src = "";
+      try {
+        await fetch('/stop_stream');
+      } catch (e) {
+        console.error("Error stopping stream", e);
+      }
+    }
+
+    async function updateMetrics() {
+      try {
+        const res = await fetch('/metrics');
+        const data = await res.json();
+
+        // --------- Per-person table ----------
+        const tbody = document.querySelector('#people_table tbody');
+        tbody.innerHTML = ''; // clear
+
+        data.people.forEach(p => {
+          const tr = document.createElement('tr');
+
+          const tdId = document.createElement('td');
+          tdId.innerText = p.id;
+
+          const tdBlink = document.createElement('td');
+          tdBlink.innerText = p.blink_count;
+
+          const tdEar = document.createElement('td');
+          tdEar.innerText = p.ear;
+
+          const tdAlert = document.createElement('td');
+          tdAlert.innerText = p.blink_alert ? 'YES' : 'No';
+          tdAlert.className = p.blink_alert ? 'alert-yes' : 'alert-no';
+
+          // === posture from global, but shown per person ===
+          const tdPosture = document.createElement('td');
+          tdPosture.innerText = data.posture_status;
+
+          const tdGoodPct = document.createElement('td');
+          tdGoodPct.innerText = data.good_posture_pct;
+
+          const tdPostureAlert = document.createElement('td');
+          tdPostureAlert.innerText = data.posture_alert ? 'YES' : 'No';
+          tdPostureAlert.className = data.posture_alert ? 'alert-yes' : 'alert-no';
+
+          const tdTime = document.createElement('td');
+          tdTime.innerText = data.elapsed_min;
+
+          const tdLast = document.createElement('td');
+          tdLast.innerText = p.last_seen_ago;
+
+          tr.appendChild(tdId);
+          tr.appendChild(tdBlink);
+          tr.appendChild(tdEar);
+          tr.appendChild(tdAlert);
+          tr.appendChild(tdPosture);
+          tr.appendChild(tdGoodPct);
+          tr.appendChild(tdPostureAlert);
+          tr.appendChild(tdTime);
+          tr.appendChild(tdLast);
+
+          tbody.appendChild(tr);
+        });
+
+        // --------- Global posture ----------
+        document.getElementById('posture_status').innerText = data.posture_status;
+        document.getElementById('good_posture_pct').innerText = data.good_posture_pct;
+        document.getElementById('elapsed_min').innerText = data.elapsed_min;
+
+        const postureAlertCell = document.getElementById('posture_alert');
+        if (data.posture_alert) {
+          postureAlertCell.innerText = 'YES';
+          postureAlertCell.className = 'alert-yes';
+        } else {
+          postureAlertCell.innerText = 'No';
+          postureAlertCell.className = 'alert-no';
+        }
+
+      } catch (e) {
+        console.error('Error fetching metrics', e);
+      }
+    }
+
+    setInterval(updateMetrics, 500);
+  </script>
+
+</body>
+</html>
